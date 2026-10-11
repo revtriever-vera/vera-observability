@@ -1,0 +1,66 @@
+{
+ "uid": "vera-indice-renda-fixa-parado",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "renda-fixa",
+ "title": "Vera API: série de índice de renda fixa parada (CDI > 5 dias ou IPCA > 45 dias)",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 600,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "max((vera_fixed_income_index_age_days{service_namespace=\"vera\", service_name=\"vera-api\", series=\"cdi_daily\"} > 5) or (vera_fixed_income_index_age_days{service_namespace=\"vera\", service_name=\"vera-api\", series=\"ipca_monthly\"} > 45))",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        0
+       ],
+       "type": "gt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "0s",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Última observação da série de índice de renda fixa (cdi_daily acima de 5 dias ou ipca_monthly acima de 45 dias de defasagem). A marcação a mercado dos títulos fica sem cobertura do índice. Ver logs de fixed-income-index-sync e a fila de renda fixa."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "warning"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}

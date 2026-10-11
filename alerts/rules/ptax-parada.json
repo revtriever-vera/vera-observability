@@ -1,0 +1,66 @@
+{
+ "uid": "vera-ptax-parada",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "cotacoes",
+ "title": "Vera API: PTAX sem ser gravada há mais de 5 dias",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "instant",
+   "relativeTimeRange": {
+    "from": 432000,
+    "to": 0
+   },
+   "datasourceUid": "__DS_LOKI__",
+   "model": {
+    "expr": "sum(count_over_time({service_namespace=\"vera\", service_name=\"vera-api\"} | identifier=`market-data-fx` |= `exchange rate stored` [5d]))",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "queryType": "instant"
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        1
+       ],
+       "type": "lt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "Alerting",
+ "execErrState": "Error",
+ "for": "0s",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Nenhuma cotação PTAX (exchange rate stored) foi gravada nos últimos 5 dias, mais que um feriado prolongado. Conversões de moeda usam taxa velha. Ver logs de market-data-fx e o comando market-data-ptax-afternoon-command."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "warning"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}

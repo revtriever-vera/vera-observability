@@ -1,0 +1,931 @@
+{
+ "uid": "vera-dados-de-mercado",
+ "title": "Vera — Dados de mercado e renda fixa",
+ "tags": [
+  "vera",
+  "mercado",
+  "renda-fixa"
+ ],
+ "timezone": "America/Sao_Paulo",
+ "schemaVersion": 39,
+ "version": 0,
+ "refresh": "5m",
+ "time": {
+  "from": "now-7d",
+  "to": "now"
+ },
+ "templating": {
+  "list": [
+   {
+    "type": "constant",
+    "name": "project",
+    "label": "Projeto",
+    "query": "vera",
+    "hide": 2,
+    "current": {
+     "text": "vera",
+     "value": "vera"
+    },
+    "options": [
+     {
+      "selected": true,
+      "text": "vera",
+      "value": "vera"
+     }
+    ]
+   },
+   {
+    "type": "query",
+    "name": "env",
+    "label": "Ambiente",
+    "datasource": {
+     "type": "prometheus",
+     "uid": "__DS_PROMETHEUS__"
+    },
+    "definition": "label_values(http_server_request_duration_seconds_count{service_namespace=\"$project\"}, deployment_environment_name)",
+    "query": {
+     "query": "label_values(http_server_request_duration_seconds_count{service_namespace=\"$project\"}, deployment_environment_name)",
+     "refId": "PrometheusVariableQueryEditor-VariableQuery"
+    },
+    "refresh": 2,
+    "sort": 1,
+    "includeAll": false,
+    "multi": false,
+    "hide": 0,
+    "options": [],
+    "current": {}
+   },
+   {
+    "type": "query",
+    "name": "service",
+    "label": "Serviço",
+    "datasource": {
+     "type": "prometheus",
+     "uid": "__DS_PROMETHEUS__"
+    },
+    "definition": "label_values(http_server_request_duration_seconds_count{service_namespace=\"$project\", deployment_environment_name=\"$env\"}, service_name)",
+    "query": {
+     "query": "label_values(http_server_request_duration_seconds_count{service_namespace=\"$project\", deployment_environment_name=\"$env\"}, service_name)",
+     "refId": "PrometheusVariableQueryEditor-VariableQuery"
+    },
+    "refresh": 2,
+    "sort": 1,
+    "includeAll": false,
+    "multi": false,
+    "hide": 0,
+    "options": [],
+    "current": {}
+   }
+  ]
+ },
+ "panels": [
+  {
+   "id": 1,
+   "type": "stat",
+   "title": "CDI: defasagem (dias)",
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "d",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "orange",
+        "value": 3
+       },
+       {
+        "color": "red",
+        "value": 5
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max(vera_fixed_income_index_age_days{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\", series=\"cdi_daily\"})"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "type": "stat",
+   "title": "IPCA: defasagem (dias)",
+   "gridPos": {
+    "x": 6,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "d",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "orange",
+        "value": 35
+       },
+       {
+        "color": "red",
+        "value": 45
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max(vera_fixed_income_index_age_days{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\", series=\"ipca_monthly\"})"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "type": "stat",
+   "title": "Ativos com cotação velha",
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "orange",
+        "value": 1
+       },
+       {
+        "color": "red",
+        "value": 10
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max(vera_quotes_stale_assets{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "type": "stat",
+   "title": "Orçamento de provedor: maior uso",
+   "gridPos": {
+    "x": 18,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "orange",
+        "value": 0.8
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max(vera_provider_budget_used_ratio{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "type": "timeseries",
+   "title": "Defasagem da série de índice (dias)",
+   "gridPos": {
+    "x": 0,
+    "y": 4,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     },
+     "unit": "d"
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max by (series) (vera_fixed_income_index_age_days{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})",
+     "legendFormat": "{{series}}"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "type": "timeseries",
+   "title": "Sincronização de índice por resultado",
+   "gridPos": {
+    "x": 12,
+    "y": 4,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "sum by (series, result) (increase(vera_fixed_income_index_sync_total{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval]))",
+     "legendFormat": "{{series}} {{result}}"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "type": "timeseries",
+   "title": "Marcação da renda fixa por status",
+   "gridPos": {
+    "x": 0,
+    "y": 12,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "sum by (status) (increase(vera_fixed_income_valuation_total{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval]))",
+     "legendFormat": "{{status}}"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "type": "timeseries",
+   "title": "Sincronização do catálogo por fonte e resultado",
+   "gridPos": {
+    "x": 12,
+    "y": 12,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "sum by (source, result) (increase(vera_catalog_sync_total{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval]))",
+     "legendFormat": "{{source}} {{result}}"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "type": "timeseries",
+   "title": "Ativos no catálogo por mercado e status",
+   "gridPos": {
+    "x": 0,
+    "y": 20,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max by (market, status) (vera_catalog_assets{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})",
+     "legendFormat": "{{market}} {{status}}"
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "type": "timeseries",
+   "title": "Cotações buscadas por provedor e resultado",
+   "gridPos": {
+    "x": 12,
+    "y": 20,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "sum by (provider, result) (increase(vera_quotes_fetch_total{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval]))",
+     "legendFormat": "{{provider}} {{result}}"
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "type": "timeseries",
+   "title": "Ativos com cotação velha",
+   "gridPos": {
+    "x": 0,
+    "y": 28,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max(vera_quotes_stale_assets{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})",
+     "legendFormat": "ativos"
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "type": "timeseries",
+   "title": "Uso do orçamento por provedor e janela",
+   "gridPos": {
+    "x": 12,
+    "y": 28,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     },
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max by (provider, window) (vera_provider_budget_used_ratio{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})",
+     "legendFormat": "{{provider}} {{window}}"
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "type": "timeseries",
+   "title": "Idade da taxa de câmbio (dias)",
+   "gridPos": {
+    "x": 0,
+    "y": 36,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     },
+     "unit": "d"
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max by (currency) (vera_exchange_rate_age_days{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})",
+     "legendFormat": "{{currency}}"
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "type": "timeseries",
+   "title": "Tempo de montagem do patrimônio (p95)",
+   "gridPos": {
+    "x": 12,
+    "y": 36,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     },
+     "unit": "ms"
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "histogram_quantile(0.95, sum by (le) (rate(vera_portfolio_snapshot_duration_ms_bucket{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval])))",
+     "legendFormat": "p95"
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "type": "timeseries",
+   "title": "Cotações ausentes no patrimônio",
+   "gridPos": {
+    "x": 0,
+    "y": 44,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "sum(increase(vera_portfolio_missing_quotes_total{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval]))",
+     "legendFormat": "ausentes"
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "type": "timeseries",
+   "title": "Sugestões de aporte por resultado",
+   "gridPos": {
+    "x": 12,
+    "y": 44,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "sum by (result) (increase(vera_contribution_suggestions_total{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval]))",
+     "legendFormat": "{{result}}"
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "type": "timeseries",
+   "title": "Exportações do patrimônio por formato",
+   "gridPos": {
+    "x": 0,
+    "y": 52,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "sum by (format) (increase(vera_portfolio_exports_total{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval]))",
+     "legendFormat": "{{format}}"
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "type": "logs",
+   "title": "Logs de dados de mercado, renda fixa e catálogo (warn/error)",
+   "gridPos": {
+    "x": 0,
+    "y": 60,
+    "w": 24,
+    "h": 10
+   },
+   "datasource": {
+    "type": "loki",
+    "uid": "__DS_LOKI__"
+   },
+   "options": {
+    "showTime": true,
+    "wrapLogMessage": true,
+    "dedupStrategy": "none",
+    "enableLogDetails": true,
+    "sortOrder": "Descending"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "loki",
+      "uid": "__DS_LOKI__"
+     },
+     "expr": "{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=~`market-data-.*|fixed-income-.*|catalog-.*|portfolio-.*|contribution-suggest` | detected_level=~`warn|error`"
+    }
+   ]
+  }
+ ]
+}

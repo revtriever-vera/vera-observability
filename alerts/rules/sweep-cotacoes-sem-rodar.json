@@ -1,0 +1,66 @@
+{
+ "uid": "vera-sweep-cotacoes-sem-rodar",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "cotacoes",
+ "title": "Vera API: sweep de cotações sem rodar há mais de 26h",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 93600,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "sum(increase(scheduled_command_heartbeat_total{service_namespace=\"vera\", service_name=\"vera-api\", command=\"market-data-quotes-sweep-command\"}[26h])) or vector(0)",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        1
+       ],
+       "type": "lt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "0s",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "O comando market-data-quotes-sweep-command (diário) não disparou nas últimas 26h. As cotações dos ativos em carteira ficam velhas. Ver heartbeat e logs de queue-consumer e market-data-sweep."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "warning"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}
