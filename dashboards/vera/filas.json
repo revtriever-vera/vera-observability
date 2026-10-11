@@ -420,8 +420,8 @@
       "type": "loki",
       "uid": "__DS_LOKI__"
      },
-     "expr": "sum by (queue) (count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` |= `queue job exhausted its attempts and was abandoned` [$__interval]))",
-     "legendFormat": "{{queue}}"
+     "expr": "sum(count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` |= `queue job exhausted its attempts and was abandoned` [$__interval]))",
+     "legendFormat": "abandonados"
     }
    ]
   },
@@ -466,8 +466,8 @@
       "type": "loki",
       "uid": "__DS_LOKI__"
      },
-     "expr": "sum by (queue) (count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` |= `queue job attempt failed` [$__interval]))",
-     "legendFormat": "{{queue}}"
+     "expr": "sum(count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` |= `queue job attempt failed` [$__interval]))",
+     "legendFormat": "tentativas falhas"
     }
    ]
   },

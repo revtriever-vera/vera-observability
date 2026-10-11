@@ -1,5 +1,8 @@
 name: apply
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -20,6 +23,8 @@ jobs:
     if: vars.GRAFANA_ENABLED == 'true' && vars.GRAFANA_URL_DEV != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      applied: ${{ steps.done.outputs.applied }}
     env:
       GRAFANA_URL: ${{ vars.GRAFANA_URL_DEV }}
       GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN_DEV }}
@@ -44,11 +49,19 @@ jobs:
         if: steps.gate.outputs.ready == 'true'
         run: bash scripts/drift.sh dev
 
+      - name: marcar dev aplicado
+        id: done
+        if: steps.gate.outputs.ready == 'true'
+        run: echo "applied=true" >> "$GITHUB_OUTPUT"
+
   prod:
     needs: dev
     if: >-
       always() && vars.GRAFANA_ENABLED == 'true' && vars.GRAFANA_URL_PROD != '' &&
-      (needs.dev.result == 'success' || github.event_name == 'workflow_dispatch')
+      (
+        (github.event_name == 'push' && needs.dev.outputs.applied == 'true') ||
+        (github.event_name == 'workflow_dispatch' && (needs.dev.outputs.applied == 'true' || needs.dev.result == 'skipped'))
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:

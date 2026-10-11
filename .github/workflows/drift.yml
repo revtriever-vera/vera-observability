@@ -1,5 +1,8 @@
 name: drift
 
+permissions:
+  contents: read
+
 on:
   schedule:
     - cron: '0 12 * * *'
@@ -29,6 +32,11 @@ jobs:
         run: |
           if [ -z "$GRAFANA_URL" ] || [ -z "$GRAFANA_TOKEN" ]; then
             echo "URL ou token de ${{ matrix.environment }} ausentes: ignorado"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ matrix.environment }}" = "prod" ] && { [ -z "$DS_PROMETHEUS" ] || [ -z "$DS_LOKI" ] || [ -z "$DS_TEMPO" ]; }; then
+            echo "variáveis de datasource de prod ausentes: ignorado"
             echo "ready=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi

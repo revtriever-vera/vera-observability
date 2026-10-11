@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh" "$1"
 
-OUT="${OUT_DIR:-$ROOT}"
+FINAL="${OUT_DIR:-$ROOT}"
+OUT="$(mktemp -d)"
+trap 'rm -rf "$OUT"' EXIT
 mkdir -p "$OUT/dashboards/$FOLDER_UID" "$OUT/alerts/rules"
-# O pull espelha a pasta: o que sumiu do Grafana some do repo também.
-rm -f "$OUT/dashboards/$FOLDER_UID"/*.json "$OUT/alerts/rules"/*.json
 
 echo "== dashboards (pasta $FOLDER_UID) =="
 api GET "/api/search?type=dash-db&folderUIDs=$FOLDER_UID&limit=5000" | jq -r '.[].uid' | while read -r uid; do
@@ -18,4 +18,10 @@ folder_rule_uids | while read -r uid; do
     echo "  $(jq -r '.title' "$OUT/alerts/rules/${uid#"$PROJECT"-}.json")"
 done
 
-echo "pull concluído em $OUT"
+# O pull espelha a pasta: o que sumiu do Grafana some do repo também, mas só depois de tudo ter sido baixado.
+mkdir -p "$FINAL/dashboards/$FOLDER_UID" "$FINAL/alerts/rules"
+rm -f "$FINAL/dashboards/$FOLDER_UID"/*.json "$FINAL/alerts/rules"/*.json
+cp "$OUT/dashboards/$FOLDER_UID"/*.json "$FINAL/dashboards/$FOLDER_UID/" 2>/dev/null || true
+cp "$OUT/alerts/rules"/*.json "$FINAL/alerts/rules/" 2>/dev/null || true
+
+echo "pull concluído em $FINAL"

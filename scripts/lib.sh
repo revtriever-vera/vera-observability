@@ -47,7 +47,7 @@ fi
 api() {
     local method="$1" path="$2"
     shift 2
-    curl -sf -X "$method" "$GRAFANA_URL$path" \
+    curl -sS --fail-with-body -X "$method" "$GRAFANA_URL$path" \
         -H "Authorization: Bearer $GRAFANA_TOKEN" \
         -H 'Content-Type: application/json' \
         -H 'X-Disable-Provenance: true' \
@@ -69,9 +69,12 @@ api_get_optional() {
     esac
 }
 
-# Pasta em que um dashboard existente está ("" se o uid não existe).
+# Pasta em que um dashboard existente está ("" se o uid não existe, "general" se está na pasta General).
 dashboard_folder() {
-    api_get_optional "/api/dashboards/uid/$1" | jq -r '.meta.folderUid // ""'
+    local body
+    body="$(api_get_optional "/api/dashboards/uid/$1")" || return 1
+    [ -n "$body" ] || return 0
+    jq -r '.meta.folderUid // ""' <<< "$body" | sed 's/^$/general/'
 }
 
 # Pasta de uma alert rule existente ("" se o uid não existe).
