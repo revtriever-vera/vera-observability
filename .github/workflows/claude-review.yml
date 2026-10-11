@@ -1,0 +1,59 @@
+name: Claude Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+    branches: [main]
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Sem token, sem review
+        id: token
+        env:
+          OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$OAUTH_TOKEN" ] && [ -z "$API_KEY" ]; then
+            echo "::warning::nem CLAUDE_CODE_OAUTH_TOKEN nem ANTHROPIC_API_KEY configurados: review pulado"
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: anthropics/claude-code-action@v1
+        if: steps.token.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Revise o PR #${{ github.event.pull_request.number }} de ${{ github.repository }}.
+            Se existir a skill pr-review em .claude/skills, siga-a. Senão: leia o corpo do PR e a issue que ele fecha (o épico e os cards ficam em revtriever-vera/vera), confira o diff contra o que o card pede e contra os padrões do repositório.
+            Procure bugs, regressões, quebra de contrato, falta de teste e qualquer dado sensível no código (IDs de conta AWS, IDs de VPC/subnet/SG, ARNs, tokens, e-mails ou telefones pessoais): o repositório é público.
+            Publique UM comentário no PR, em pt-BR, com os achados ordenados por gravidade (arquivo:linha, o problema, a correção sugerida).
+            A última linha do comentário deve ser exatamente uma destas:
+            VEREDITO: APROVADO
+            VEREDITO: MUDANÇAS NECESSÁRIAS
+            Use MUDANÇAS NECESSÁRIAS só para problema que precisa ser corrigido antes do merge; observações menores não bloqueiam.
+          claude_args: |
+            --max-turns 80
+            --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh issue view:*),Bash(gh api:*),Bash(git log:*),Bash(git diff:*),Bash(git show:*)"
