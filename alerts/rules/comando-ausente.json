@@ -1,0 +1,66 @@
+{
+ "uid": "vera-comando-ausente",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "filas",
+ "title": "Vera API: comando agendado atrasado (próximo disparo vencido há mais de 10min)",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 600,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "max(time() - scheduled_command_next_run_timestamp_seconds{service_namespace=\"vera\", service_name=\"vera-api\"})",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        600
+       ],
+       "type": "gt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "5m",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Um comando agendado (cron BullMQ) do vera-api está com o próximo disparo vencido há mais de 10min: o worker parou de executá-lo. Ver heartbeat e logs de queue-consumer."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "warning"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}

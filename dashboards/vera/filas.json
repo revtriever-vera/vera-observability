@@ -1,0 +1,599 @@
+{
+ "uid": "vera-filas",
+ "title": "Vera — Filas",
+ "tags": [
+  "vera",
+  "filas"
+ ],
+ "timezone": "America/Sao_Paulo",
+ "schemaVersion": 39,
+ "version": 0,
+ "refresh": "1m",
+ "time": {
+  "from": "now-6h",
+  "to": "now"
+ },
+ "templating": {
+  "list": [
+   {
+    "type": "constant",
+    "name": "project",
+    "label": "Projeto",
+    "query": "vera",
+    "hide": 2,
+    "current": {
+     "text": "vera",
+     "value": "vera"
+    },
+    "options": [
+     {
+      "selected": true,
+      "text": "vera",
+      "value": "vera"
+     }
+    ]
+   },
+   {
+    "type": "query",
+    "name": "env",
+    "label": "Ambiente",
+    "datasource": {
+     "type": "prometheus",
+     "uid": "__DS_PROMETHEUS__"
+    },
+    "definition": "label_values(queue_oldest_waiting_job_age_seconds{service_namespace=\"$project\"}, deployment_environment_name)",
+    "query": {
+     "query": "label_values(queue_oldest_waiting_job_age_seconds{service_namespace=\"$project\"}, deployment_environment_name)",
+     "refId": "PrometheusVariableQueryEditor-VariableQuery"
+    },
+    "refresh": 2,
+    "sort": 1,
+    "includeAll": false,
+    "multi": false,
+    "hide": 0,
+    "options": [],
+    "current": {}
+   },
+   {
+    "type": "query",
+    "name": "service",
+    "label": "Serviço",
+    "datasource": {
+     "type": "prometheus",
+     "uid": "__DS_PROMETHEUS__"
+    },
+    "definition": "label_values(queue_oldest_waiting_job_age_seconds{service_namespace=\"$project\", deployment_environment_name=\"$env\"}, service_name)",
+    "query": {
+     "query": "label_values(queue_oldest_waiting_job_age_seconds{service_namespace=\"$project\", deployment_environment_name=\"$env\"}, service_name)",
+     "refId": "PrometheusVariableQueryEditor-VariableQuery"
+    },
+    "refresh": 2,
+    "sort": 1,
+    "includeAll": false,
+    "multi": false,
+    "hide": 0,
+    "options": [],
+    "current": {}
+   }
+  ]
+ },
+ "panels": [
+  {
+   "id": 1,
+   "type": "stat",
+   "title": "Fila: job mais antigo",
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "orange",
+        "value": 300
+       },
+       {
+        "color": "red",
+        "value": 600
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max(queue_oldest_waiting_job_age_seconds{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "type": "stat",
+   "title": "Jobs abandonados (24h)",
+   "gridPos": {
+    "x": 6,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "loki",
+    "uid": "__DS_LOKI__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "loki",
+      "uid": "__DS_LOKI__"
+     },
+     "expr": "sum(count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` |= `queue job exhausted its attempts and was abandoned` [24h]))",
+     "queryType": "instant"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "type": "stat",
+   "title": "Erros da fila (1h)",
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "loki",
+    "uid": "__DS_LOKI__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "loki",
+      "uid": "__DS_LOKI__"
+     },
+     "expr": "sum(count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` | detected_level=`error` [1h]))",
+     "queryType": "instant"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "type": "stat",
+   "title": "Comando agendado atrasado (máx)",
+   "gridPos": {
+    "x": 18,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "orange",
+        "value": 300
+       },
+       {
+        "color": "red",
+        "value": 600
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max(time() - scheduled_command_next_run_timestamp_seconds{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "type": "timeseries",
+   "title": "Idade do job mais antigo por fila",
+   "gridPos": {
+    "x": 0,
+    "y": 4,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max by (queue) (queue_oldest_waiting_job_age_seconds{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})",
+     "legendFormat": "{{queue}}"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "type": "timeseries",
+   "title": "Erros por LOG_IDENTIFIER",
+   "gridPos": {
+    "x": 12,
+    "y": 4,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "loki",
+    "uid": "__DS_LOKI__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "loki",
+      "uid": "__DS_LOKI__"
+     },
+     "expr": "sum by (identifier) (count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | detected_level=`error` [$__interval]))",
+     "legendFormat": "{{identifier}}"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "type": "timeseries",
+   "title": "Jobs abandonados após esgotar tentativas (DLQ)",
+   "gridPos": {
+    "x": 0,
+    "y": 12,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "loki",
+    "uid": "__DS_LOKI__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "loki",
+      "uid": "__DS_LOKI__"
+     },
+     "expr": "sum(count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` |= `queue job exhausted its attempts and was abandoned` [$__interval]))",
+     "legendFormat": "abandonados"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "type": "timeseries",
+   "title": "Tentativas de job que falharam",
+   "gridPos": {
+    "x": 12,
+    "y": 12,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "loki",
+    "uid": "__DS_LOKI__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "loki",
+      "uid": "__DS_LOKI__"
+     },
+     "expr": "sum(count_over_time({service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` |= `queue job attempt failed` [$__interval]))",
+     "legendFormat": "tentativas falhas"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "type": "timeseries",
+   "title": "Execuções de comando agendado (heartbeat)",
+   "gridPos": {
+    "x": 0,
+    "y": 20,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "sum by (command) (increase(scheduled_command_heartbeat_total{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"}[$__rate_interval]))",
+     "legendFormat": "{{command}}"
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "type": "timeseries",
+   "title": "Atraso do próximo disparo por comando",
+   "gridPos": {
+    "x": 12,
+    "y": 20,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "__DS_PROMETHEUS__"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "__DS_PROMETHEUS__"
+     },
+     "expr": "max by (command) (time() - scheduled_command_next_run_timestamp_seconds{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"})",
+     "legendFormat": "{{command}}"
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "type": "logs",
+   "title": "Logs da fila (warn/error)",
+   "gridPos": {
+    "x": 0,
+    "y": 28,
+    "w": 24,
+    "h": 10
+   },
+   "datasource": {
+    "type": "loki",
+    "uid": "__DS_LOKI__"
+   },
+   "options": {
+    "showTime": true,
+    "wrapLogMessage": true,
+    "dedupStrategy": "none",
+    "enableLogDetails": true,
+    "sortOrder": "Descending"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "loki",
+      "uid": "__DS_LOKI__"
+     },
+     "expr": "{service_namespace=\"$project\", service_name=\"$service\", deployment_environment_name=\"$env\"} | identifier=`queue-consumer` | detected_level=~`warn|error`"
+    }
+   ]
+  }
+ ]
+}
