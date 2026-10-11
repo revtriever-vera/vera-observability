@@ -1,0 +1,4 @@
+environments/prod.env
+environments/*.local.env
+.env
+*.token
