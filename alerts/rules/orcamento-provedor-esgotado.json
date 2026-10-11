@@ -1,0 +1,66 @@
+{
+ "uid": "vera-orcamento-provedor-esgotado",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "cotacoes",
+ "title": "Vera API: orçamento de provedor de cotações esgotado",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 600,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "max(vera_provider_budget_used_ratio{service_namespace=\"vera\", service_name=\"vera-api\"} >= 1)",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        0
+       ],
+       "type": "gt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "0s",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Um provedor de cotações usou todo o orçamento de chamadas de uma janela (minuto, dia ou mês) e as próximas buscas serão recusadas. Ver o painel Dados de mercado e os logs de market-data-budget."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "warning"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}

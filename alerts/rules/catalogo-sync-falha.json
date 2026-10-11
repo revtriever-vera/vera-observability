@@ -1,0 +1,66 @@
+{
+ "uid": "vera-catalogo-sync-falha",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "catalogo",
+ "title": "Vera API: sincronização do catálogo falhou nas últimas 24h",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 86400,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "sum(increase(vera_catalog_sync_total{service_namespace=\"vera\", service_name=\"vera-api\", result=~\"failed|skipped_suspicious\"}[24h]))",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        0
+       ],
+       "type": "gt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "0s",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Uma rodada de sincronização do catálogo terminou com failed ou skipped_suspicious (fonte b3, us, crypto ou tesouro). O catálogo pode estar defasado. Ver logs de catalog-sync e catalog-source."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "warning"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}

@@ -1,0 +1,66 @@
+{
+ "uid": "vera-sweep-cotacoes-falhas",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "cotacoes",
+ "title": "Vera API: falhas de cotação acima de 20% nas últimas 24h",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 86400,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "sum(increase(vera_quotes_fetch_total{service_namespace=\"vera\", service_name=\"vera-api\", result=\"failed\"}[24h])) / sum(increase(vera_quotes_fetch_total{service_namespace=\"vera\", service_name=\"vera-api\"}[24h]))",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        0.2
+       ],
+       "type": "gt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "0s",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Mais de 20% das cotações buscadas nas últimas 24h falharam (result=failed em vera_quotes_fetch_total). Algum provedor pode estar fora do ar ou rejeitando. Ver logs de market-data-provider e market-data-chunk."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "warning"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}
