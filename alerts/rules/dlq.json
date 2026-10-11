@@ -1,0 +1,66 @@
+{
+ "uid": "vera-dlq",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "filas",
+ "title": "Vera API: job abandonado após esgotar as tentativas",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "instant",
+   "relativeTimeRange": {
+    "from": 600,
+    "to": 0
+   },
+   "datasourceUid": "__DS_LOKI__",
+   "model": {
+    "expr": "sum(count_over_time({service_namespace=\"vera\", service_name=\"vera-api\"} | identifier=`queue-consumer` |= `queue job exhausted its attempts and was abandoned` [10m]))",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "queryType": "instant"
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        0
+       ],
+       "type": "gt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "0s",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Um job BullMQ do vera-api esgotou as tentativas e foi abandonado (ficou no conjunto de falhos). Ver os logs de queue-consumer para a fila, o tipo e o jobId."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "critical"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}

@@ -1,0 +1,66 @@
+{
+ "uid": "vera-readiness",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "disponibilidade",
+ "title": "Vera API: readiness degradado",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 600,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "max(readiness_degraded{service_namespace=\"vera\", service_name=\"vera-api\"})",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        0
+       ],
+       "type": "gt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "5m",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "A sonda de readiness do vera-api reporta degradado há mais de 5min (banco indisponível). Ver logs com identifier health-readiness."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "critical"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}

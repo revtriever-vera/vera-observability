@@ -1,0 +1,66 @@
+{
+ "uid": "vera-5xx",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "api",
+ "title": "Vera API: taxa de erro 5xx acima de 1%",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 600,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "sum(rate(http_server_request_duration_seconds_count{service_namespace=\"vera\", service_name=\"vera-api\", http_response_status_code=~\"5..\"}[5m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count{service_namespace=\"vera\", service_name=\"vera-api\"}[5m])), 0.001)",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        0.01
+       ],
+       "type": "gt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "OK",
+ "execErrState": "Error",
+ "for": "5m",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Mais de 1% das respostas HTTP do vera-api são 5xx nos últimos 5min. Verificar os logs (por identifier) e os traces do serviço."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "critical"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}
