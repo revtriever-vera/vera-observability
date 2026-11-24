@@ -39,6 +39,7 @@ Alertas:
 | `dlq.json` | job abandonado após esgotar as tentativas | critical |
 | `fila-parada.json` | job mais antigo em espera acima de 10 min | warning |
 | `comando-ausente.json` | próximo disparo de comando agendado vencido há mais de 10 min | warning |
+| `cota-cvm-parada.json` | nenhuma cota do provedor `cvm` com `result=ok` em 5 dias corridos (3 dias úteis) | warning |
 
 Métricas e logs de negócio (webhook, IA, lojas, WhatsApp, cobrança) nascem com os épicos que os instrumentam.
 

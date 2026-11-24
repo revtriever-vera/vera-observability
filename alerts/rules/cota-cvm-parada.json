@@ -1,0 +1,66 @@
+{
+ "uid": "vera-cota-cvm-parada",
+ "orgID": 1,
+ "folderUID": "vera",
+ "ruleGroup": "cotacoes",
+ "title": "Vera API: cota CVM sem atualização há mais de 3 dias úteis",
+ "condition": "C",
+ "data": [
+  {
+   "refId": "A",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 432000,
+    "to": 0
+   },
+   "datasourceUid": "__DS_PROMETHEUS__",
+   "model": {
+    "expr": "sum(increase(vera_quotes_fetch_total{service_namespace=\"vera\", service_name=\"vera-api\", provider=\"cvm\", result=\"ok\"}[5d])) or vector(0)",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "A",
+    "instant": true
+   }
+  },
+  {
+   "refId": "C",
+   "queryType": "",
+   "relativeTimeRange": {
+    "from": 0,
+    "to": 0
+   },
+   "datasourceUid": "__expr__",
+   "model": {
+    "conditions": [
+     {
+      "evaluator": {
+       "params": [
+        1
+       ],
+       "type": "lt"
+      }
+     }
+    ],
+    "expression": "A",
+    "intervalMs": 1000,
+    "maxDataPoints": 43200,
+    "refId": "C",
+    "type": "threshold"
+   }
+  }
+ ],
+ "noDataState": "Alerting",
+ "execErrState": "Error",
+ "for": "0s",
+ "keep_firing_for": "0s",
+ "annotations": {
+  "summary": "Nenhuma cota do provedor cvm com result=ok em vera_quotes_fetch_total nos últimos 5 dias corridos (3 dias úteis mais um fim de semana). As cotas dos fundos CVM em carteira ficam velhas. Ver logs de market-data-provider e market-data-chunk e o sync do catálogo de fundos CVM."
+ },
+ "labels": {
+  "project": "vera",
+  "severity": "warning"
+ },
+ "isPaused": false,
+ "record": null,
+ "version": 0
+}
